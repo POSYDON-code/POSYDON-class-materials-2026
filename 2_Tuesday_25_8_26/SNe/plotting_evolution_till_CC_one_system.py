@@ -14,7 +14,7 @@ def plot_SN_evolution(df, df_oneline = None):
 
     if df_oneline is not None:
         f_fb = [df_oneline["S1_f_fb"].values, df_oneline["S2_f_fb"].values]
-        v_kick = [df_oneline["S1_natal_kick_array_0"].values, df_oneline["S2_natal_kick_array_0"].values]
+        v_kick = [df_oneline["S1_natal_kick_velocity"].values, df_oneline["S2_natal_kick_velocity"].values]
     else:
         f_fb = [None, None]
         v_kick = [None, None]
