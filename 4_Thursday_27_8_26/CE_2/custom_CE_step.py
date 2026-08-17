@@ -31,7 +31,8 @@ from posydon.config import PATH_TO_POSYDON
 from posydon.utils.common_functions import check_state_of_star
 from posydon.utils.common_functions import calculate_lambda_from_profile, calculate_Mejected_for_integrated_binding_energy
 from posydon.utils.posydonwarning import Pwarn
-
+import unicodedata
+import difflib
 
 MODEL = {"prescription": 'alpha-lambda',
          "common_envelope_efficiency": 1.0,
@@ -77,6 +78,7 @@ STAR_STATE_POST_MS = [
     "H-rich_Core_He_burning",
     "H-rich_Central_He_depleted",
     "H-rich_Central_C_depletion",
+    "H-rich_Core_He_depleted",
     "H-rich_non_burning",
     "accreted_He_non_burning"
 ]
@@ -217,8 +219,7 @@ class StepCEE(object):
                 binary, donor_star, comp_star,
                 double_CE=double_CE, verbose=self.verbose,
                 common_envelope_option_after_succ_CEE=(
-                    self.
-                    ),
+                    self.common_envelope_option_after_succ_CEE),
                 core_definition_H_fraction=self.core_definition_H_fraction,
                 core_definition_He_fraction=self.core_definition_He_fraction,
                 mass_loss_during_CEE_merged=self.mass_loss_during_CEE_merged)
@@ -637,15 +638,15 @@ class StepCEE(object):
         return (mc1_f, rc1_f, mc2_f, rc2_f, separation_f, orbital_period_f,
                 merger)
     
-    def calculate_binding_energy(self,core_definition_H_fraction,star,common_envelope_alpha_thermal):
-        #Step 4
-        pass 
+    def calculate_binding_energy(self,core_definition_H_fraction,star,common_envelope_alpha_thermal = 1):
+        #Complete the function: Step 4
+        pass
     
     
     
     def calculate_lamda_CE(self,core_definition_H_fraction,star,common_envelope_alpha_thermal = 1):
-        #Step 4 
-        pass 
+        #Complete the function: Step 4
+        pass
     
     def CEE_simple_alpha_prescription(
             self, binary, donor, comp_star, double_CE=False,
@@ -655,44 +656,40 @@ class StepCEE(object):
             core_definition_He_fraction=MODEL['core_definition_He_fraction'],
             mass_loss_during_CEE_merged=MODEL['mass_loss_during_CEE_merged']):
         """Apply the alpha-lambda common-envelope prescription from Lab1"""
-        # Get star properties
+        # Get stars properties: Step 1
+     
+        # Get binary parameters: Step 2
         
-        #Step 1 we need the stellar parameters like mass,radius from the donor and companion star.
-
-
-        #Step2 
-
-
-        #Step3 Profiles 
+        #Define the profiles: Step 3
         
-
-
 
         lambda1_CE,mc1_i,rc1_i = self.calculate_lamda_CE(core_definition_H_fraction,donor_prof,self.common_envelope_alpha_thermal)
+        
         if double_CE:
             lambda2_CE,mc2_i,rc2_i = self.calculate_lamda_CE(core_definition_H_fraction,comp_prof,self.common_envelope_alpha_thermal)
-        
-        # calculate evolution of the orbit
-        #ebind_i = 
+        else:
+            mc2_i = comp_star.mass
+            rc2_i = 10**comp_star.log_R
+            lambda2_CE = np.nan
+
+        # Calculate the binding energy: Step 5
+        ebind_i = 
 
         if double_CE:
-            ebind_i += (-const.standard_cgrav / lambda2_CE
-                        * (m2_i * const.Msun * (m2_i - mc2_i) * const.Msun)
-                        / (radius2 * const.Rsun))
+            # Calculate the binding energy: Step 5
+            ebind_i += 
         
-        #Step5 Seperation 
-        separation_i = const.Rsun * cf.orbital_separation_from_period(
-            period_i, m1_i, m2_i)   # in cgs units
+        
+        #Calculate the seperation 
+        
+        separation_i = # Step 6
 
-        #Step6 Calculate the post_CE seperation. 
-       # eorb_i = (-0.5 * const.standard_cgrav * m1_i * const.Msun
-       #           * m2_i * const.Msun / separation_i)
-       # 
-       # 
-       # eorb_postCEE = eorb_i + ebind_i/alpha_CE
+        eorb_i = # Step 7
 
-       #separation_postCEE = (-0.5 * const.standard_cgrav * mc1_i * const.Msun
-       #                      * mc2_i * const.Msun / eorb_postCEE)
+        eorb_postCEE = # Step 7
+        
+        separation_postCEE = #Step 7
+
 
         # Check to make sure final orbital separation is positive
         if separation_postCEE < -self.CEE_tolerance_err:
@@ -706,27 +703,42 @@ class StepCEE(object):
             print("DEorb", eorb_postCEE - eorb_i)
             print("separation_i in Rsun", separation_i/const.Rsun)
             print("separation_postCEE in Rsun", separation_postCEE/const.Rsun)
-        
-        #Finding the companion state
-        if donor.state in STAR_STATE_POST_MS:       # "H_Giant":
+
+            
+        def normalize(s):
+            return unicodedata.normalize("NFKC", s).strip()
+
+        # normalize states
+        state = normalize(donor.state)
+        comp_state = normalize(comp_star.state)
+
+        # normalize lists
+        STAR_STATE_POST_MS_clean = [normalize(s) for s in STAR_STATE_POST_MS]
+        STAR_STATE_POST_HeMS_clean = [normalize(s) for s in STAR_STATE_POST_HeMS]
+
+        # donor type
+        if state in STAR_STATE_POST_MS_clean:
             donor_type = 'He_core'
-        elif donor.state in STAR_STATE_POST_HeMS:   # "He_Giant":
+        elif state in STAR_STATE_POST_HeMS_clean:
             donor_type = 'CO_core'
             core_element_fraction_definition = 0.1
         else:
-            raise ValueError("type = %s of donor of CEE not recognized"
-                             % donor.state)
-            
-            
-        if comp_star.state in STAR_STATE_POST_MS:       # "H_Giant":
-            comp_type = 'He_core'
-        elif comp_star.state in STAR_STATE_POST_HeMS:   # "He_Giant":
-            comp_type = 'CO_core'
-            core_element_fraction_definition = 0.1
+            closest = difflib.get_close_matches(state, STAR_STATE_POST_MS_clean + STAR_STATE_POST_HeMS_clean)
+            raise ValueError(f"type = {state!r} of donor not recognized. Closest match: {closest}")
+        
+        if double_CE:
+            # companion type
+            if comp_state in STAR_STATE_POST_MS_clean:
+                comp_type = 'He_core'
+            elif comp_state in STAR_STATE_POST_HeMS_clean:
+                comp_type = 'CO_core'
+                core_element_fraction_definition = 0.1
+            else:
+                closest = difflib.get_close_matches(comp_state, STAR_STATE_POST_MS_clean + STAR_STATE_POST_HeMS_clean)
+                raise ValueError(f"type = {comp_state!r} of companion not recognized. Closest match: {closest}")
         else:
-            raise ValueError("type = %s of donor of CEE not recognized"
-                             % donor.state)
-
+            comp_type = "not_giant_companion"
+            
         # Calculate the post-CE binary properties
         if (common_envelope_option_after_succ_CEE
             == "one_phase_variable_core_definition"):
@@ -1038,4 +1050,3 @@ class StepCEE(object):
             comp_star.he_core_radius = np.nan
 
         return
-        
