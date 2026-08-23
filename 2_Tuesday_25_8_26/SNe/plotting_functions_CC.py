@@ -250,3 +250,143 @@ def plot_SN_evolution(df, df_oneline = None):
 
     plt.tight_layout()
     plt.show()
+
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+
+
+def plot_M4_mapping(
+    M_CO,
+    X_C,
+    image_path="./Patton_M4.png",
+    plot_bounds=(100, 570, 60, 520),
+    M_CO_range=(2.5, 10.0),
+    X_C_range=(0.05, 0.5),
+    show_plot_bounds=False
+):
+    """
+    Overlay one or two points on the Patton & Sukhbold (2020) M4 mapping,
+    with M_CO on the x-axis and X_C on the y-axis.
+
+    Parameters
+    ----------
+    M_CO : float or sequence
+        CO-core mass(es) at helium depletion, in Msun.
+
+    X_C : float or sequence
+        Carbon mass fraction(s) at helium depletion.
+
+    plot_bounds : tuple
+        Pixel coordinates of the main plotting panel:
+        (left, right, top, bottom).
+
+    M_CO_range : tuple
+        Minimum and maximum M_CO values on the x-axis.
+
+    X_C_range : tuple
+        Minimum and maximum X_C values on the y-axis.
+    """
+
+    M_CO = np.atleast_1d(M_CO).astype(float)
+    X_C = np.atleast_1d(X_C).astype(float)
+
+    if len(M_CO) != len(X_C):
+        raise ValueError("M_CO and X_C must contain the same number of values.")
+
+    if len(M_CO) not in (1, 2):
+        raise ValueError("Provide either one or two pairs of values.")
+
+    img = mpimg.imread(image_path)
+    image_height, image_width = img.shape[:2]
+
+    left, right, top, bottom = plot_bounds
+    M_CO_min, M_CO_max = M_CO_range
+    X_C_min, X_C_max = X_C_range
+
+    # Map M_CO onto the horizontal pixel coordinates
+    x_pixel = left + (
+        (M_CO - M_CO_min) / (M_CO_max - M_CO_min)
+    ) * (right - left)
+
+    # Map X_C onto the vertical pixel coordinates
+    y_pixel = top + (
+        (X_C_max - X_C) / (X_C_max - X_C_min)
+    ) * (bottom - top)
+
+    fig, ax = plt.subplots(figsize=(10, 7))
+    ax.imshow(img, origin="upper")
+
+    colors = ["purple", "red"]
+
+    for i, (x, y, m_co, x_c) in enumerate(
+        zip(x_pixel, y_pixel, M_CO, X_C)
+    ):
+        ax.scatter(
+            x,
+            y,
+            s=200,
+            marker="*",
+            color=colors[i],
+            edgecolor="white",
+            linewidth=1.5,
+            zorder=5,
+            label=(
+                rf"CC {i + 1}: "
+                rf"$M_{{\rm CO}}={m_co:.2f}\,M_\odot$, "
+                rf"$X_{{\rm C}}={x_c:.3f}$"
+            )
+        )
+
+        ax.annotate(
+            "CC"+str(i + 1),
+            xy=(x, y),
+            xytext=(8, 8),
+            textcoords="offset points",
+            fontsize=14,
+            fontweight="bold",
+            color=colors[i],
+            zorder=6
+        )
+
+    if show_plot_bounds:
+        rectangle = plt.Rectangle(
+            (left, top),
+            right - left,
+            bottom - top,
+            fill=False,
+            color="red",
+            linestyle="--",
+            linewidth=1.5
+        )
+        ax.add_patch(rectangle)
+
+    ax.set_xlim(0, image_width)
+    ax.set_ylim(image_height, 0)
+    ax.axis("off")
+    #ax.legend(loc="upper left", frameon=True)
+
+    caption  = r"Image 1: Extracted $M_4$ as a function of $M_{\rm CO}$–$X_{\rm C}$ (from Patton+2020)"
+    if image_path=="./Patton_explodability.png":
+        caption = r"Image 2: Explodability outcome (i.e. explosion+NS vs implosion+BH), based on Ertl+criterion, as a function of $X_{\rm C}$–$M_{\rm CO}$ (from Patton+2020)"
+    fig.subplots_adjust(bottom=0.13)
+    fig.text(
+        0.5,
+        0.03,
+        caption,
+        ha="center",
+        fontsize=11,
+        fontweight="bold"
+    )
+
+    plt.show()
