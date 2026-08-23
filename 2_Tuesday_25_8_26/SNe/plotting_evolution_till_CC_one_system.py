@@ -64,14 +64,14 @@ def plot_SN_evolution(df, df_oneline = None):
     axes[0].plot(df.loc[mask1_alive, "remaining_time"], df.loc[mask1_alive, "S1_mass"],
                  linewidth=1.5, color="blue", label="primary total mass")
     axes[0].plot(df.loc[mask1_dead, "remaining_time"], df.loc[mask1_dead, "S1_mass"],
-                 linewidth=1.5, color="lightskyblue")
+                 linewidth=1.5, color="royalblue")
     axes[0].plot(df.loc[mask1_alive, "remaining_time"], df.loc[mask1_alive, "S1_he_core_mass"],
                  linewidth=2.5, linestyle="dotted", color="blue", label="primary He-core mass")
     
     axes[0].scatter(df.loc[mask1_alive, "remaining_time"], df.loc[mask1_alive, "S1_mass"],
                     color="blue", s=20, alpha=0.7, zorder=2)
     axes[0].scatter(df.loc[mask1_dead, "remaining_time"], df.loc[mask1_dead, "S1_mass"],
-                    color="lightskyblue", s=20, alpha=0.7, zorder=2)
+                    color="royalblue", s=20, alpha=0.7, zorder=2)
     axes[0].scatter(df.loc[mask1_alive, "remaining_time"], df.loc[mask1_alive, "S1_he_core_mass"],
                     color="blue", s=20, alpha=0.7, marker="o", zorder=2)
 
@@ -82,7 +82,7 @@ def plot_SN_evolution(df, df_oneline = None):
     axes[0].plot(df.loc[mask2_alive, "remaining_time"], df.loc[mask2_alive, "S2_mass"],
                  linewidth=1.5, color="green", label="secondary total mass")
     axes[0].plot(df.loc[mask2_dead, "remaining_time"], df.loc[mask2_dead, "S2_mass"],
-                 linewidth=1.5, color="mediumspringgreen")
+                 linewidth=1.5, color="limegreen")
     axes[0].plot(df.loc[mask2_alive, "remaining_time"], df.loc[mask2_alive, "S2_he_core_mass"],
                  linewidth=2.5, linestyle="dotted", color="green", label="secondary He-core mass")
     
