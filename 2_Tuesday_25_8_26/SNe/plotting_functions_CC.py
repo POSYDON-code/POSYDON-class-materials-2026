@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from posydon.binary_evol.flow_chart import STAR_STATES_CO
 
-def plot_SN_evolution(df, df_oneline = None):
+def plot_SN_evolution(df, df_oneline = None, show_steps = False):
     """
     Plot the evolution of primary and secondary masses, He-core masses, and orbital period
     (with eccentricity on a twin y-axis).
@@ -216,14 +216,15 @@ def plot_SN_evolution(df, df_oneline = None):
         t_step = row["remaining_time"]
         step_label = row["step_names"]
 
-        # mass panel
-        axes[0].axvline(x=t_step, color="grey", linestyle="dotted", linewidth=1)
-        axes[0].text(t_step, axes[0].get_ylim()[1],
+        if show_steps == True:
+            # mass panel
+            axes[0].axvline(x=t_step, color="grey", linestyle="dotted", linewidth=1)
+            axes[0].text(t_step, axes[0].get_ylim()[1],
                      str(step_label), rotation=90, va="bottom", ha="center",
                      fontsize=fs_text, color="black")
 
-        # orbital panel
-        axes[1].axvline(x=t_step, color="grey", linestyle="dotted", linewidth=1)
+            # orbital panel
+            axes[1].axvline(x=t_step, color="grey", linestyle="dotted", linewidth=1)
 
     
     # --- Axis settings
